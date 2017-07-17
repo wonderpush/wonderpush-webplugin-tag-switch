@@ -1,0 +1,41 @@
+{
+  "name": "wonderpush-webplugin-tag-switch",
+  "version": "1.0.0",
+  "description": "WonderPush Web SDK plugin to present the user with a switch she can use to tag herself, like subscribing to a category of push notifications.",
+  "main": "src/tag-switch.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/wonderpush/wonderpush-webplugin-tag-switch.git"
+  },
+  "keywords": [
+    "wonderpush",
+    "web",
+    "plugin",
+    "tag",
+    "switch"
+  ],
+  "author": "WonderPush",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/wonderpush/wonderpush-webplugin-tag-switch/issues"
+  },
+  "homepage": "https://github.com/wonderpush/wonderpush-webplugin-tag-switch#readme",
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.4.2",
+    "gulp-copy": "^1.0.0",
+    "gulp-git": "^2.4.1",
+    "gulp-header": "^1.8.8",
+    "gulp-jsdoc3": "^1.0.1",
+    "gulp-jshint": "^2.0.4",
+    "gulp-less": "^3.3.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-stylelint": "^3.9.0",
+    "gulp-uglify": "^3.0.0",
+    "jshint": "^2.9.4",
+    "lazypipe": "^1.0.1",
+    "q": "^1.5.0"
+  }
+}
