@@ -148,6 +148,22 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     return value;
   };
 
+  /**
+   * Scans the document and initializes any new switches.
+   *
+   * This is automatically done once during the SDK initialization.
+   *
+   * If developing a SPA or dynamically adding new elements to your page like with React,
+   * you should call this function to make new switches active.
+   *
+   * ```javascript
+   * WonderPush.ready(function(WonderPushSDK) {
+   *   WonderPushSDK.Plugins.get('tag-switch').setupTagSwitch();
+   * });
+   * ```
+   *
+   * @alias TagSwitch#setupTagSwitch
+   */
   this.setupTagSwitch = function() {
     if (options.switchElementClass === null) return;
     var customPropertiesPromise = WonderPushSDK.getInstallationCustomProperties(); // read once for multiple switches
