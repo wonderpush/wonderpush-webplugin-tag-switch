@@ -36,6 +36,9 @@ You can find the reference of the options in the {@link TagSwitch.Options} secti
 When loaded, the plugin looks for placeholder elements like the following, and fleshes them out to beautiful switches:
 
 ```xml
+<!-- For manipulating tags -->
+<div class="wonderpush-tag-switch" data-tag="sports" data-label="#sports"></div>
+<!-- For manipulating properties -->
 <div class="wonderpush-tag-switch" data-field="string_follow" data-value="sports" data-label="#sports"></div>
 ```
 

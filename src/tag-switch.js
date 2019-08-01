@@ -4,11 +4,14 @@
  * When loaded, the plugin looks for placeholder elements like the following, and fleshes them out to beautiful switches:
  *
  * ```xml
+ * <!-- For manipulating tags -->
+ * <div class="wonderpush-tag-switch" data-tag="sports" data-label="#sports"></div>
+ * <!-- For manipulating properties -->
  * <div class="wonderpush-tag-switch" data-field="string_follow" data-value="sports" data-label="#sports"></div>
  * ```
  *
- * The `data-field` and `data-value` attributes are mandatory, they define what value is to be put or removed and into what field,
- * when the switch is on or off.
+ * Either the `data-tag` or the `data-field` together with `data-value` attributes are mandatory, they define what tag is manipulated,
+ * or what value is to be put or removed and into what field, when the switch is flipped.
  *
  * The `data-label` attribute is highly recommended to signify to the user the meaning of the switch, otherwise ON/OFF are used.
  * You can also use `data-sentence` to prepend a text on the switch label.
@@ -166,7 +169,6 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
    */
   this.setupTagSwitch = function() {
     if (options.switchElementClass === null) return;
-    var customPropertiesPromise = WonderPushSDK.getInstallationCustomProperties(); // read once for multiple switches
     var switchesNodeList = document.querySelectorAll('.' + switchElementClass);
     var unsupported = options.unsupported || ''; // this is not documented as the WonderPush SDK itself is not loaded if push notifications are not supported
     var classPrefix = options.classPrefix || 'wp-tag-';
@@ -180,7 +182,12 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     var colorOn = options.colorOn;
     var colorOff = options.colorOff;
 
-    return WonderPushSDK.getInstallationCustomProperties().then(function(custom) {
+    return Promise.all([
+      WonderPushSDK.getProperties(),
+      WonderPushSDK.getTags(),
+    ]).then(function(inputPromises) {
+      var custom = inputPromises[0];
+      var tags = inputPromises[1];
       Array.prototype.slice.call(switchesNodeList).forEach(function(switchEl) {
         if (!switchEl || switchEl.dataset.wpInitialized === 'true') return;
         switchEl.dataset.wpInitialized = 'true';
@@ -188,8 +195,13 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
           switchEl.innerHTML = (switchEl.dataset.unsupported || unsupported);
           return;
         }
-        if (!switchEl.dataset.field || !switchEl.dataset.value) {
-          WonderPushSDK.logWarn('Missing field or value data attribute for', switchEl);
+        var hasTag = !!switchEl.dataset.tag;
+        var hasProperty = !!switchEl.dataset.field && !!switchEl.dataset.value;
+        if (hasTag && hasProperty) {
+          WonderPushSDK.logWarn('In the presence of a tag data attribute, field and value data attributes are ignored for', switchEl);
+        }
+        if (!hasTag && !hasProperty) {
+          WonderPushSDK.logWarn('Missing tag, or both field and value data attribute for', switchEl);
           return;
         }
         /*
@@ -233,8 +245,12 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
 
         // Initialize switch state
         input.disabled = !WonderPushSDK.isNativePushNotificationSupported();
-        var values = ensureArray(custom[switchEl.dataset.field]);
-        input.checked = values.indexOf(switchEl.dataset.value) >= 0;
+        if (hasTag) {
+          input.checked = tags.indexOf(switchEl.dataset.tag) >= 0;
+        } else {
+          var values = ensureArray(custom[switchEl.dataset.field]);
+          input.checked = values.indexOf(switchEl.dataset.value) >= 0;
+        }
 
         wrapper.appendChild(sentenceSpan);
         wrapper.appendChild(labelEl);
@@ -247,26 +263,21 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     var notifSwitch = event.target.closest('.' + switchElementClass);
     var newChecked = event.target.checked;
     if (newChecked) {
-      WonderPushSDK.setNotificationEnabled(newChecked, event);
+      WonderPushSDK.subscribeToNotifications(event);
     }
-    WonderPushSDK.getInstallationCustomProperties().then(function(custom) {
-      var values = ensureArray(custom[notifSwitch.dataset.field]);
-      var diff = {};
+    if (notifSwitch.dataset.tag) {
       if (newChecked) {
-        if (values.indexOf(notifSwitch.dataset.value) < 0) {
-          values.push(notifSwitch.dataset.value);
-          diff[notifSwitch.dataset.field] = values;
-        }
+        WonderPush.addTag(notifSwitch.dataset.tag);
       } else {
-        while (values.indexOf(notifSwitch.dataset.value) >= 0) {
-          values.splice(values.indexOf(notifSwitch.dataset.value), 1);
-          diff[notifSwitch.dataset.field] = values;
-        }
+        WonderPush.removeTag(notifSwitch.dataset.tag);
       }
-      if (Object.keys(diff).length) {
-        WonderPushSDK.putInstallationCustomProperties(diff);
+    } else {
+      if (newChecked) {
+        WonderPush.addProperty(notifSwitch.dataset.field, notifSwitch.dataset.value);
+      } else {
+        WonderPush.removeProperty(notifSwitch.dataset.field, notifSwitch.dataset.value);
       }
-    });
+    }
   };
 
   init();
