@@ -178,7 +178,7 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     var switchesNodeList = document.querySelectorAll('.' + switchElementClass);
     if (!switchesNodeList.length) return;
     var unsupported = options.unsupported || ''; // this is not documented as the WonderPush SDK itself is not loaded if push notifications are not supported
-    const includeUnsupportedOption = options.includeUnsupported === 'true';
+    var includeUnsupportedOption = options.includeUnsupported === 'true';
     var classPrefix = options.classPrefix || 'wp-tag-';
     var prepend = options.prepend || '';
     var append = options.append || '';
