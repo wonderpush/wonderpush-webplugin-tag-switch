@@ -200,8 +200,7 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
         if (!switchEl || switchEl.dataset.wpInitialized === 'true') return;
         switchEl.dataset.wpInitialized = 'true';
         var includeUnsupported = includeUnsupportedOption || switchEl.dataset.includeUnsupported === 'true';
-        if (!includeUnsupported
-          && !WonderPushSDK.isNativePushNotificationSupported()) {
+        if (!includeUnsupported && !WonderPushSDK.isNativePushNotificationSupported()) {
           switchEl.innerHTML = (switchEl.dataset.unsupported || unsupported);
           return;
         }
