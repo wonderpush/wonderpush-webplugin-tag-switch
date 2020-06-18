@@ -59,6 +59,11 @@
  *
  *   You can override it from the placeholder element using the `data-class-prefix` attribute.
  *
+ * @property {string} [includeUnsupported="true"]
+ *   By default, tag switches only appear for browsers that support web push notifications,
+ *   which excludes Safari. Setting this to `true` will let safari users enjoy tag switches you can
+ *   use for in-app messaging segmentation.
+ *
  * @property {string} [prepend]
  *   Optional HTML code to inject before the actual switch element.
  *   Escape your double quotes properly, and pay extra attention not to create syntax errors or malformed HTML!
@@ -130,10 +135,6 @@
  * @see {@link https://wonderpush.github.io/wonderpush-javascript-sdk/latest/WonderPushPluginSDK.html#.TriggersConfig|WonderPush JavaScript Plugin SDK triggers configuration reference}
  */
 WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
-  // Do not show anything on unsupported browsers.
-  if (WonderPushSDK.Notification.getSubscriptionState() === WonderPushSDK.SubscriptionState.UNSUPPORTED) {
-    return;
-  }
 
   WonderPushSDK.loadStylesheet('style.css');
 
@@ -177,6 +178,7 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     var switchesNodeList = document.querySelectorAll('.' + switchElementClass);
     if (!switchesNodeList.length) return;
     var unsupported = options.unsupported || ''; // this is not documented as the WonderPush SDK itself is not loaded if push notifications are not supported
+    const includeUnsupportedOption = options.includeUnsupported === 'true';
     var classPrefix = options.classPrefix || 'wp-tag-';
     var prepend = options.prepend || '';
     var append = options.append || '';
@@ -197,7 +199,9 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
       Array.prototype.slice.call(switchesNodeList).forEach(function(switchEl) {
         if (!switchEl || switchEl.dataset.wpInitialized === 'true') return;
         switchEl.dataset.wpInitialized = 'true';
-        if (!WonderPushSDK.isNativePushNotificationSupported()) {
+        var includeUnsupported = includeUnsupportedOption || switchEl.dataset.includeUnsupported === 'true';
+        if (!includeUnsupported
+          && !WonderPushSDK.isNativePushNotificationSupported()) {
           switchEl.innerHTML = (switchEl.dataset.unsupported || unsupported);
           return;
         }
@@ -250,7 +254,7 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
         input.addEventListener('click', onSwitchClicked);
 
         // Initialize switch state
-        input.disabled = !WonderPushSDK.isNativePushNotificationSupported();
+        input.disabled = !WonderPushSDK.isNativePushNotificationSupported() && !includeUnsupported;
         if (hasTag) {
           input.checked = tags.indexOf(switchEl.dataset.tag) >= 0;
         } else {
@@ -268,7 +272,7 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
   var onSwitchClicked = function(event) {
     var notifSwitch = event.target.closest('.' + switchElementClass);
     var newChecked = event.target.checked;
-    if (newChecked) {
+    if (newChecked && WonderPushSDK.isNativePushNotificationSupported()) {
       WonderPushSDK.subscribeToNotifications(event);
     }
     if (notifSwitch.dataset.tag) {
