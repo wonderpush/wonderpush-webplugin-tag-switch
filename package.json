@@ -1,6 +1,6 @@
 {
   "name": "wonderpush-webplugin-tag-switch",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "WonderPush Web SDK plugin to present the user with a switch she can use to tag herself, like subscribing to a category of push notifications.",
   "main": "src/tag-switch.js",
   "repository": {
