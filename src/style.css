@@ -15,7 +15,7 @@
 }
 
 .wp-tag-switch-input {
-  display: none;
+  display: none !important;
 }
 
 .wp-tag-switch-label {
