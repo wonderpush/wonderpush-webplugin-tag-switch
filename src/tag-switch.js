@@ -190,10 +190,16 @@ WonderPush.registerPlugin('tag-switch', function(WonderPushSDK, options) {
     var colorOn = options.colorOn;
     var colorOff = options.colorOff;
 
-    return Promise.all([
-      WonderPushSDK.getProperties(),
-      WonderPushSDK.getTags(),
-    ]).then(function(inputPromises) {
+    // Caching calls to getProperties and getTags for a few ms,
+    // to avoid repeating the same when setupTagSwitch is called in a for loop
+    if (!this.cachedPromises) {
+      this.cachedPromises = [
+        WonderPushSDK.getProperties(),
+        WonderPushSDK.getTags(),
+      ];
+      setTimeout(function() { this.cachedPromises = undefined; }.bind(this), 100);
+    }
+    return Promise.all(this.cachedPromises).then(function(inputPromises) {
       var custom = inputPromises[0];
       var tags = inputPromises[1];
       Array.prototype.slice.call(switchesNodeList).forEach(function(switchEl) {
